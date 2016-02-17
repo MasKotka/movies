@@ -43,14 +43,14 @@ for f in "$filmsdir"/*; do
 			continue
 		fi
 
-		fail=true
-		for p in "${people[@]}"; do
-			if [ "$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' "$f" | grep -- "+$p")" != "" ]; then
-				fail=false
-				break
-			fi
-		done
-		if $fail; then
+		result=$(sed -e '1,/^---\+$/d' -e '/^---\+$/,$d' -e '/^[^+]/d' -e 's/^+//' "$f" | \
+				sort -u | \
+				while IFS=$'\n' read -r p; do
+					if [[ ! "${people[@]}" =~ "$p" ]]; then
+						echo "$p"
+					fi
+				done)
+		if [ "$result" != "" ]; then
 			continue
 		fi
 
